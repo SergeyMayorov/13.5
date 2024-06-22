@@ -1,12 +1,13 @@
 package task135
 
-// v2.0.0
+// v2.1.0
 import (
 	"bufio"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"os"
+	"sort"
 )
 
 type Patient struct {
@@ -20,6 +21,12 @@ type Patients struct {
 	XMLName xml.Name  `xml:"Patients"`
 	List    []Patient `xml:"Patient"`
 }
+
+type ByAge []Patient
+
+func (a ByAge) Len() int           { return len(a) }
+func (a ByAge) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByAge) Less(i, j int) bool { return a[i].Age < a[j].Age }
 
 func Do(inputPath, outputPath string) error {
 	file, err := os.Open(inputPath)
@@ -43,6 +50,8 @@ func Do(inputPath, outputPath string) error {
 	if err := scan.Err(); err != nil {
 		return fmt.Errorf("ошибка сканера: %v", err)
 	}
+
+	sort.Sort(ByAge(patients.List))
 
 	res, err := xml.MarshalIndent(patients, "", "    ")
 	if err != nil {
